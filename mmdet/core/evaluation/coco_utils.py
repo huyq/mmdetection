@@ -150,12 +150,13 @@ def det2json(dataset, results):
         result = results[idx]
         for label in range(len(result)):
             bboxes = result[label]
+            label_ = label if label<len(dataset.CLASSES) else len(dataset.CLASSES)-1
             for i in range(bboxes.shape[0]):
                 data = dict()
                 data['image_id'] = img_id
                 data['bbox'] = xyxy2xywh(bboxes[i])
                 data['score'] = float(bboxes[i][4])
-                data['category_id'] = dataset.cat_ids[label]
+                data['category_id'] = dataset.cat_ids[label_] 
                 json_results.append(data)
     return json_results
 

@@ -195,6 +195,7 @@ def _dist_train(model, dataset, cfg, validate=False):
 def _non_dist_train(model, dataset, cfg, validate=False):
     # prepare data loaders
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
+    
     data_loaders = [
         build_dataloader(
             ds,

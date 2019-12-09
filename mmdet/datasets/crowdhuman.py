@@ -1,28 +1,16 @@
 import numpy as np
+import pickle
 from pycocotools.coco import COCO
 
-from .custom import CustomDataset
+from .coco import CocoDataset
 from .registry import DATASETS
 
 
 @DATASETS.register_module
-class CocoDataset(CustomDataset):
+class CrowdHumanDataset(CocoDataset):
 
-    CLASSES = ('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-               'train', 'truck', 'boat', 'traffic_light', 'fire_hydrant',
-               'stop_sign', 'parking_meter', 'bench', 'bird', 'cat', 'dog',
-               'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
-               'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-               'skis', 'snowboard', 'sports_ball', 'kite', 'baseball_bat',
-               'baseball_glove', 'skateboard', 'surfboard', 'tennis_racket',
-               'bottle', 'wine_glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-               'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
-               'hot_dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-               'potted_plant', 'bed', 'dining_table', 'toilet', 'tv', 'laptop',
-               'mouse', 'remote', 'keyboard', 'cell_phone', 'microwave',
-               'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock',
-               'vase', 'scissors', 'teddy_bear', 'hair_drier', 'toothbrush')
-
+    CLASSES = ('person', 'mask')
+    
     def load_annotations(self, ann_file):
         self.coco = COCO(ann_file)
         self.cat_ids = self.coco.getCatIds()
@@ -75,7 +63,8 @@ class CocoDataset(CustomDataset):
         for i, ann in enumerate(ann_info):
             if ann.get('ignore', False):
                 continue
-            x1, y1, w, h = ann['bbox']
+            #x1, y1, w, h = ann['bbox']
+            x1, y1, w, h = ann['vbox']
             if ann['area'] <= 0 or w < 1 or h < 1:
                 continue
             bbox = [x1, y1, x1 + w, y1 + h]

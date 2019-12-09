@@ -67,6 +67,7 @@ class RPN(BaseDetector, RPNTestMixin):
                 proposals[:, :4] /= meta['scale_factor']
         # TODO: remove this restriction
         return proposal_list[0].cpu().numpy()
+    
 
     def aug_test(self, imgs, img_metas, rescale=False):
         proposal_list = self.aug_test_rpn(

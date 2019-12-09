@@ -156,6 +156,7 @@ class BBoxHead(nn.Module):
                 bboxes /= scale_factor
             else:
                 bboxes /= torch.from_numpy(scale_factor).to(bboxes.device)
+        
 
         if cfg is None:
             return bboxes, scores

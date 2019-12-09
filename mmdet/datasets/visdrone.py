@@ -1,28 +1,18 @@
 import numpy as np
+import pickle
 from pycocotools.coco import COCO
 
-from .custom import CustomDataset
+from .coco import CocoDataset
 from .registry import DATASETS
 
 
+
 @DATASETS.register_module
-class CocoDataset(CustomDataset):
+class VisDroneDataset(CocoDataset):
 
-    CLASSES = ('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-               'train', 'truck', 'boat', 'traffic_light', 'fire_hydrant',
-               'stop_sign', 'parking_meter', 'bench', 'bird', 'cat', 'dog',
-               'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
-               'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-               'skis', 'snowboard', 'sports_ball', 'kite', 'baseball_bat',
-               'baseball_glove', 'skateboard', 'surfboard', 'tennis_racket',
-               'bottle', 'wine_glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-               'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
-               'hot_dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-               'potted_plant', 'bed', 'dining_table', 'toilet', 'tv', 'laptop',
-               'mouse', 'remote', 'keyboard', 'cell_phone', 'microwave',
-               'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock',
-               'vase', 'scissors', 'teddy_bear', 'hair_drier', 'toothbrush')
-
+    CLASSES = ('pedestrian', 'people', 'bicycle', 'car', 'van', 'truck', 'tricycle',
+               'awning-tricycle', 'bus', 'motor')
+    
     def load_annotations(self, ann_file):
         self.coco = COCO(ann_file)
         self.cat_ids = self.coco.getCatIds()
@@ -54,7 +44,7 @@ class CocoDataset(CustomDataset):
             if min(img_info['width'], img_info['height']) >= min_size:
                 valid_inds.append(i)
         return valid_inds
-
+    
     def _parse_ann_info(self, img_info, ann_info):
         """Parse bbox and mask annotation.
 
@@ -70,21 +60,21 @@ class CocoDataset(CustomDataset):
         gt_bboxes = []
         gt_labels = []
         gt_bboxes_ignore = []
-        gt_masks_ann = []
-
+        
         for i, ann in enumerate(ann_info):
             if ann.get('ignore', False):
                 continue
             x1, y1, w, h = ann['bbox']
-            if ann['area'] <= 0 or w < 1 or h < 1:
+            if w < 1 or h < 1:
+                continue
+            if ann['category_id'] == 0 or ann['category_id'] == 11:
                 continue
             bbox = [x1, y1, x1 + w, y1 + h]
             if ann.get('iscrowd', False):
                 gt_bboxes_ignore.append(bbox)
             else:
                 gt_bboxes.append(bbox)
-                gt_labels.append(self.cat2label[ann['category_id']])
-                gt_masks_ann.append(ann['segmentation'])
+                gt_labels.append(self.cat2label[int(ann['category_id'])-1])
 
         if gt_bboxes:
             gt_bboxes = np.array(gt_bboxes, dtype=np.float32)
@@ -98,13 +88,12 @@ class CocoDataset(CustomDataset):
         else:
             gt_bboxes_ignore = np.zeros((0, 4), dtype=np.float32)
 
-        seg_map = img_info['filename'].replace('jpg', 'png')
 
         ann = dict(
             bboxes=gt_bboxes,
             labels=gt_labels,
             bboxes_ignore=gt_bboxes_ignore,
-            masks=gt_masks_ann,
-            seg_map=seg_map)
+            masks=None,
+            seg_map=None)
 
         return ann

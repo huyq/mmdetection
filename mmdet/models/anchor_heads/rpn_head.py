@@ -52,6 +52,17 @@ class RPNHead(AnchorHead):
         return dict(
             loss_rpn_cls=losses['loss_cls'], loss_rpn_bbox=losses['loss_bbox'])
 
+    def get_bboxes_batch(self,
+                   cls_scores,
+                   bbox_preds,
+                   mlvl_anchors,
+                   img_shape,
+                   scale_factor,
+                   cfg,
+                   rescale=False):
+        print("sos")
+        pass
+    
     def get_bboxes_single(self,
                           cls_scores,
                           bbox_preds,

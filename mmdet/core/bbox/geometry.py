@@ -1,7 +1,7 @@
 import torch
 
 
-def bbox_overlaps(bboxes1, bboxes2, mode='iou', is_aligned=False):
+def bbox_overlaps(bboxes1, bboxes2, mode='iof', is_aligned=False):
     """Calculate overlap between two set of bboxes.
 
     If ``is_aligned`` is ``False``, then calculate the ious between each bbox

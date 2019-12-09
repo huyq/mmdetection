@@ -271,9 +271,9 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
 
         det_bboxes, det_labels = self.simple_test_bboxes(
             x, img_meta, proposal_list, self.test_cfg.rcnn, rescale=rescale)
-        bbox_results = bbox2result(det_bboxes, det_labels,
-                                   self.bbox_head.num_classes)
-
+        
+        bbox_results = [bbox2result(_det_bboxes, _det_labels,
+                                   self.bbox_head.num_classes) for _det_bboxes, _det_labels in zip(det_bboxes, det_labels)]
         if not self.with_mask:
             return bbox_results
         else:
@@ -290,17 +290,19 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         # recompute feats to save memory
         proposal_list = self.aug_test_rpn(
             self.extract_feats(imgs), img_metas, self.test_cfg.rpn)
+        
         det_bboxes, det_labels = self.aug_test_bboxes(
             self.extract_feats(imgs), img_metas, proposal_list,
             self.test_cfg.rcnn)
-
+        """
         if rescale:
             _det_bboxes = det_bboxes
         else:
             _det_bboxes = det_bboxes.clone()
             _det_bboxes[:, :4] *= img_metas[0][0]['scale_factor']
-        bbox_results = bbox2result(_det_bboxes, det_labels,
-                                   self.bbox_head.num_classes)
+        """
+        bbox_results = [bbox2result(_det_bboxes, _det_labels,
+                                   self.bbox_head.num_classes) for _det_bboxes, _det_labels in zip(det_bboxes, det_labels)]
 
         # det_bboxes always keep the original scale
         if self.with_mask:
